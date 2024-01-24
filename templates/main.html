@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <form action="{% url "search" %}">
+        <input type="search" placeholder="search" name="q">
+        <button>Search</button>
+    </form>
+    <h1>Abdul Manan</h1>
+
+    <form method="POST" onsubmit="return false">
+        {% csrf_token %}
+        <input type="text" placeholder="name" name="name">
+        <input type="text" placeholder="phone" name="phone">
+        <button onclick="addContact()">Add Contact</button>
+    </form>
+    {{contacts}}
+
+    <ul>
+        {% for contact in contacts %}
+        <li>
+            {{contact.id}}
+            {{contact.name}}
+            {{contact.phone}}
+            <button><a href="{% url "view" contact.id %}">view</a></button>
+            <button><a href="{% url "del" contact.id %}">X</a></button>
+        </li>
+        {% endfor %}
+    </ul>
+</body>
+
+<script>
+    function addContact(){
+        console.log('submiting')
+        const ul = document.querySelector('ul')
+        const name = document.getElementsByName('name')[0].value
+        const phone = document.getElementsByName('phone')[0].value
+        const token = document.getElementsByName('csrfmiddlewaretoken')[0].value
+        const contact = {
+            name :name,
+            phone : phone
+        }
+        console.log(contact)
+        fetch('http://127.0.0.1:8080/form',{
+            method : 'POST',
+            headers : {
+                "X-CSRFToken": token,
+                "Content-Type" : "application/json"
+
+
+            },
+            body : JSON.stringify(contact)
+        })
+        .then(res => res.json())
+        .then(res => {
+            console.log(res)
+            const li = document.createElement('li')
+        li.innerHTML = `
+                    ${res.id}
+                    ${res.name}
+                    ${res.phone}
+                    <button><a href="http://127.0.0.1:8080/view/${res.id}">view</a></button>
+                    <button><a href="http://127.0.0.1:8080/del/${res.id}">X</a></button>
+                    `
+                    ul.appendChild(li)
+        })
+    }
+</script>
+</html>
